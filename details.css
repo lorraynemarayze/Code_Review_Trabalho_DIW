@@ -1,0 +1,33 @@
+ body {
+     font-family: 'Quicksand', sans-serif;
+ }
+
+ .ratings {
+     margin-top: 60px;
+     color: rgb(0, 0, 0);
+ }
+
+ .navbar-custom {
+     background-color: #ffffff;
+     opacity: 0.9;
+ }
+
+ .navbar-custom a.nav-link {
+     color: #000000;
+ }
+
+ .details-img {
+     object-fit: cover;
+     width: 100%;
+     max-width: 815px;
+     height: auto;
+ }
+
+ footer {
+     width: 100%;
+     background-color: #fafafa;
+     color: #000000;
+ }
+.footerdetails{
+    background-color: #fafafa;
+}
