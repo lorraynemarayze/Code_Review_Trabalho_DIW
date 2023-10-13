@@ -24,7 +24,7 @@ function getProductId() {
 async function fetchProducts() {
   try {
     const productId = getProductId();
-    const url = `https://diwserver.vps.webdock.cloud/products/${productId}`;
+    const url = `https://fakestoreapi.com/products/${productId}`;
     const response = await fetch(url);
     const data = await response.json();
     return data;
