@@ -1,5 +1,4 @@
-//URL da API
-const apiURL = 'https://diwserver.vps.webdock.cloud/products';
+require('dotenv').config();
 
 // Cria os cards skeleton
 function createSkeletonCard() {
@@ -7,7 +6,7 @@ function createSkeletonCard() {
     <div class="col-lg-4 col-md-6">
       <div class="card card-skeleton">
         <div class="card-body">
-          <div class="img">
+          <div class="img"></div>
           <h5 class="card-title"></h5>
           <p class="card-text category"></p>
           <p class="card-text price"></p>
@@ -18,7 +17,7 @@ function createSkeletonCard() {
 }
 
 // Cria os cards e popula com informações da response
-function createProductCard(product, index) {
+function createProductCard(product) {
   return `
     <div class="col-lg-4 col-md-6" data-category="${product.category}">
       <div class="card">
@@ -27,14 +26,13 @@ function createProductCard(product, index) {
           <h5 class="card-title">${product.title}</h5>
           <p class="card-text category">${product.category}</p>
           <p class="card-text price">${product.price} USD</p>
-          <a class"btn btn-primary" href="details.html?id=${product.id}">Detalhes</a>
+          <a class="btn btn-primary" href="details.html?id=${product.id}">Detalhes</a>
         </div>
       </div>
     </div>
   `;
 }
 
-// Busca os produtos
 async function fetchProducts(searchTerm = '') {
   try {
     const url = getUrl(searchTerm, 21);
@@ -47,14 +45,9 @@ async function fetchProducts(searchTerm = '') {
   }
 }
 
-// Gera url de busca
-getUrl = (searchTerm, pageItems = 12) => {
-  // Caso exista um termo pesquisado, retorna a url de busca
-  if (searchTerm) {
-    return `${apiURL}/search?query=${searchTerm}&page_items=60`
-  }
-  return `${apiURL}?page_items=${pageItems}&page=12  
-  `
+function getUrl(searchTerm, limit = 21) {
+  const baseUrl = process.env.API_URL; // Usa a variável de ambiente
+  return `${baseUrl}/search?query=${searchTerm}&limit=${limit}&key=${process.env.API_KEY}`;
 }
 
 // Troca os skeleton com cards de produtos
@@ -62,56 +55,23 @@ async function displayProducts(searchTerm = '') {
   const products = await fetchProducts(searchTerm);
   const productsDiv = $('#products');
   productsDiv.empty();
+  
   if (products?.length) {
-    products.forEach(function (product, index) {
-      productsDiv.append(createProductCard(product, index));
+    products.forEach(product => {
+      productsDiv.append(createProductCard(product));
     });
     AOS.init();
   } else {
     productsDiv.append(`
       <div class="col-12">
-        <h5 class="text-center">Nenhum produto encontrado.</h2>
+        <h5 class="text-center">Nenhum produto encontrado.</h5>
       </div>
     `);
   }
 }
 
-async function displayProductsByCategory(category = '') {
-  try {
-    const url = `https://diwserver.vps.webdock.cloud/products/category/${category}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    const productsDiv = $('#products');
-    productsDiv.empty();
-    if (data.products?.length) {
-      data.products.forEach(function (product, index) {
-        productsDiv.append(createProductCard(product, index));
-      });
-      AOS.init();
-    } else {
-      productsDiv.append(`
-        <div class="col-12">
-          <h5 class="text-center">Nenhum produto encontrado.</h2>
-        </div>
-      `);
-    }
-  } catch (error) {
-    renderError();
-    console.error(error);
-  }
-}
-
-// Função para criar os cards skeleton
-// recebe o número de skeletons como param
-function renderSkeletons (skeletonQuantity) {
-  const productsDiv = $('#products');
-  for (let i = 0; i < skeletonQuantity; i++) {
-    productsDiv.append(createSkeletonCard());
-  }
-}
-
-//Função para renderizar mensagem de erro
-function renderError () {
+// Função para renderizar mensagem de erro
+function renderError() {
   const productsDiv = $('#products');
   productsDiv.empty();
   productsDiv.append(`
@@ -121,5 +81,14 @@ function renderError () {
   `);
 }
 
+// Função para criar os cards skeleton
+function renderSkeletons(skeletonQuantity) {
+  const productsDiv = $('#products');
+  for (let i = 0; i < skeletonQuantity; i++) {
+    productsDiv.append(createSkeletonCard());
+  }
+}
+
+// Inicializa a aplicação
 renderSkeletons(6);
 displayProducts();
