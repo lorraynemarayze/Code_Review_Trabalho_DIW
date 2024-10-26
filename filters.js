@@ -1,23 +1,14 @@
 // Verifica se o preço do produto está dentro do range selecionado
 function isPriceMatch(price, priceRange) {
-  if (priceRange === '') {
-    return true; // All prices match
-  } else if (priceRange === '0-1000') {
-    return price >= 0 && price <= 1000; 
-  } else if (priceRange === '1001-2000') {
-    return price >= 1001 && price <= 2000;
-  } else if (priceRange === '2000+') {
-    return price > 2000;
-  }
+  if (priceRange === '') return true;
+
+  const [min, max] = priceRange.split('-').map(Number);
+  return (max ? price >= min && price <= max : price >= min);
 }
 
 // Verifica se a categoria do produto é a mesma selecionada
 function isCategoryMatch(productCategory, selectedCategory) {
-  if (selectedCategory === '') {
-    return true; // All categories match
-  } else {
-    return productCategory === selectedCategory;
-  }
+  return selectedCategory === '' || productCategory === selectedCategory;
 }
 
 // Combina os filtros de preço e categoria
@@ -28,63 +19,50 @@ function filterProducts(priceRange, selectedCategory) {
   productCards.hide(); //adiciona display: none no css dos cards
 
   productCards.each(function () {
-    //this é cada productCard
     const priceText = $(this).find('.price').text();
     const price = parseFloat(priceText);
     const productCategory = $(this).data('category');
 
     const priceMatch = isPriceMatch(price, priceRange);
-
-    // const categoryMatch = isCategoryMatch(productCategory, selectedCategory);
-    // A função isCategoryMatch é equivalente a:
-
-    const categoryMatch = selectedCategory === '' || productCategory === selectedCategory;
+    const categoryMatch = isCategoryMatch(productCategory, selectedCategory);
     
     if (priceMatch && categoryMatch) {
-      $(this).show(); //remove o display: none do css dos cards
+      $(this).show(); // Mostra apenas os cards que combinam
     }
   });
 }
 
 // Popula o select com as categorias
 function populateCategories(categories) {
-  // Localiza o <select> de categorias
   const categorySelect = $('#categoryFilter');
-
-  // Adiciona os <option> com as categorias
-  categories.forEach(function (category) {
+  categories.forEach(category => {
     categorySelect.append(`<option value="${category}">${category}</option>`);
   });
 }
 
-// Adiciona o eventListener para o select de preço
+// Adiciona event listeners
 $('#priceFilter').change(function () {
   const selectedPriceRange = $(this).val();
   const selectedCategory = $('#categoryFilter').val();
   filterProducts(selectedPriceRange, selectedCategory);
 });
 
-// Adiciona o eventListener para o select de categoria
 $('#categoryFilter').change(function () {
   const selectedPriceRange = $('#priceFilter').val();
   const selectedCategory = $(this).val();
-  //filterProducts(selectedPriceRange, selectedCategory);
-  displayProductsByCategory(selectedCategory)
+  displayProductsByCategory(selectedCategory);
 });
-// Adiciona o eventListener para o botão de busca
-$('#searchButton').click(function() {
-  //searchTerm = paris
+
+$('#searchButton').click(function () {
   const searchTerm = $('#searchInput').val();
   displayProducts(searchTerm);
 });
 
-// Adiciona o eventListener para o input de busca
-// ao digitarmos ENTER, executa a busca.
-$("#searchInput").keyup(function(event) {
+$("#searchInput").keyup(function (event) {
   if (event.keyCode === 13) {
     const searchTerm = $('#searchInput').val();
     displayProducts(searchTerm);
-  } 
+  }
 });
 
 // Busca a lista de categorias da API
@@ -98,17 +76,5 @@ async function initializeCategories() {
   }
 }
 
-initializeCategories();
-
-// Busca a lista de categorias da API
-async function initializeCategories() {
-  try {
-    const response = await fetch(`${apiURL}/categories`);
-    const categories = await response.json();
-    populateCategories(categories);
-  } catch (error) {
-    console.error(error);
-  }
-}
-
+// Inicializa categorias na aplicação
 initializeCategories();
